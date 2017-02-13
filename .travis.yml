@@ -1,0 +1,11 @@
+language: go
+sudo: required
+
+install:
+- curl https://glide.sh/get | sh
+
+script:
+- go test $(glide novendor)
+
+notifications:
+  email: false
