@@ -6,7 +6,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/coreos/kapprover/approvers"
+	"github.com/coreos-inc/kapprover/approvers"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 
-	_ "github.com/coreos/kapprover/approvers/always"
+	_ "github.com/coreos-inc/kapprover/approvers/always"
 )
 
 var (
