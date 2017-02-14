@@ -18,10 +18,10 @@ func init() {
 	approvers.Register("always", &Always{})
 }
 
-// Always is an Approver that automatically approves any CSR submitted by
-// Kubelets during their TLS bootstrapping process, without making any kind of
-// validation besides verifying whether they have been approved or denied
-// already.
+// Always is an Approver that automatically approves any pending CSR submitted
+// by kubelets during their TLS bootstrapping process, without making any kind
+// of validation besides checking that the requester's user/group are
+// respectively kubeletBootstrapUsername / kubeletBootstrapGroup.
 type Always struct{}
 
 // Approve approves CSRs in a loop.
