@@ -3,7 +3,7 @@ package always
 import (
 	"strings"
 
-	"github.com/coreos-inc/kapprover/approvers"
+	"github.com/coreos-inc/kapprover/pkg/approvers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/typed/certificates/v1beta1"
 	certificates "k8s.io/client-go/pkg/apis/certificates/v1beta1"
