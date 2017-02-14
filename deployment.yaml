@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kubelet-approver
+  namespace: kube-system
+  labels:
+    app: kubelet-approver
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: kubelet-approver
+      labels:
+        app: kubelet-approver
+    spec:
+      containers:
+      - name: kubelet-approver
+        imagePullPolicy: IfNotPresent
+        image: quay.io/coreos/kapprover:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 50Mi
