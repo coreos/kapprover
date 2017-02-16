@@ -58,7 +58,6 @@ func main() {
 				log.Errorf("Failed to approve %q: %s", req.ObjectMeta.Name, err)
 				return
 			}
-			log.Infof("Successfully approved %q", req.ObjectMeta.Name)
 		}
 	}
 

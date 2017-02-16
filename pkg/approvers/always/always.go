@@ -3,6 +3,7 @@ package always
 import (
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/coreos-inc/kapprover/pkg/approvers"
 	"k8s.io/client-go/kubernetes/typed/certificates/v1alpha1"
 	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
@@ -76,6 +77,8 @@ func (*Always) Approve(client v1alpha1.CertificateSigningRequestInterface, reque
 
 			return err
 		}
+
+		log.Infof("Successfully approved %q", request.ObjectMeta.Name)
 
 		return nil
 	}
