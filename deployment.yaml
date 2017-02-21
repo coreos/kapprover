@@ -4,14 +4,14 @@ metadata:
   name: kubelet-approver
   namespace: kube-system
   labels:
-    app: kubelet-approver
+    k8s-app: kubelet-approver
 spec:
   replicas: 1
   template:
     metadata:
       name: kubelet-approver
       labels:
-        app: kubelet-approver
+        k8s-app: kubelet-approver
     spec:
       containers:
       - name: kubelet-approver
