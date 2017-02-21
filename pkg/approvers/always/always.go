@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/coreos-inc/kapprover/pkg/approvers"
+	"github.com/coreos/kapprover/pkg/approvers"
 	"k8s.io/client-go/kubernetes/typed/certificates/v1alpha1"
 	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
 )
