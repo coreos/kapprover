@@ -13,9 +13,13 @@ var (
 	approversM sync.RWMutex
 )
 
-// Approver reprensents anything capable to validating and approving a CSR.
+var (
+	NoAction = certificates.CertificateSigningRequestCondition{}
+)
+
+// Approver represents anything capable of validating and approving a CSR.
 type Approver interface {
-	Approve(v1alpha1.CertificateSigningRequestInterface, *certificates.CertificateSigningRequest) error
+	Approve(v1alpha1.CertificateSigningRequestInterface, *certificates.CertificateSigningRequest) (certificates.CertificateSigningRequestCondition, error)
 }
 
 // Register makes an Approver available by the provided name.
@@ -44,7 +48,7 @@ func Register(name string, a Approver) {
 	approvers[name] = a
 }
 
-// List returns the list of the registered approvers's name.
+// List returns the list of the registered approvers' names.
 func List() []string {
 	approversM.RLock()
 	defer approversM.RUnlock()
@@ -57,7 +61,7 @@ func List() []string {
 	return ret
 }
 
-// Unregister removes a Approverwith a particular name from the list.
+// Unregister removes an Approver with a particular name from the list.
 func Unregister(name string) {
 	approversM.Lock()
 	defer approversM.Unlock()

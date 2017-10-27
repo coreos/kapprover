@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
+	certfiicateType "k8s.io/client-go/kubernetes/typed/certificates/v1alpha1"
 	"k8s.io/client-go/pkg/fields"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -54,7 +55,7 @@ func main() {
 
 	f := func(obj interface{}) {
 		if req, ok := obj.(*certificates.CertificateSigningRequest); ok {
-			if err := approver.Approve(client.CertificatesV1alpha1Client.CertificateSigningRequests(), req); err != nil {
+			if err := tryApprove(approver, client.CertificatesV1alpha1Client.CertificateSigningRequests(), req); err != nil {
 				log.Errorf("Failed to approve %q: %s", req.ObjectMeta.Name, err)
 				return
 			}
@@ -96,4 +97,43 @@ func newClient(kubeconfigPath string) (*kubernetes.Clientset, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
+}
+
+func tryApprove(approver approvers.Approver, client certfiicateType.CertificateSigningRequestInterface, request *certificates.CertificateSigningRequest) error {
+	for {
+		// Verify that the CSR hasn't been approved or denied already.
+		//
+		// There are only two possible conditions (CertificateApproved and
+		// CertificateDenied). Therefore if the CSR already has a condition,
+		// it means that the request has already been approved or denied, and that
+		// we should ignore the request.
+		if len(request.Status.Conditions) > 0 {
+			return nil
+		}
+
+		condition, err := approver.Approve(client, request)
+		if err != nil || condition.Type == "" {
+			return err
+		}
+		request.Status.Conditions = append(request.Status.Conditions, condition)
+
+		// Submit the updated CSR.
+		if _, err = client.UpdateApproval(request); err != nil {
+			if strings.Contains(err.Error(), "the object has been modified") {
+				// The CSR might have been updated by a third-party, retry until we
+				// succeed.
+				request, err = client.Get(request.ObjectMeta.Name)
+				if err != nil {
+					return err
+				}
+				continue
+			}
+
+			return err
+		}
+
+		log.Infof("Successfully approved %q", request.ObjectMeta.Name)
+
+		return nil
+	}
 }
