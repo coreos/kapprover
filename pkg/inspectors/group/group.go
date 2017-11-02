@@ -7,28 +7,33 @@ import (
 	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
 )
 
-const (
-	kubeletBootstrapGroup = "system:kubelet-bootstrap"
-)
-
 func init() {
-	inspectors.Register("group", &group{})
+	inspectors.Register("group", &group{"system:kubelet-bootstrap"})
 }
 
 // Group is an Inspector that verifies the CSR was submitted
-// by a user in the "system:kubelet-bootstrap".
-type group struct{}
+// by a user in the configured group.
+type group struct {
+	requiredGroup string
+}
 
-func (*group) Inspect(client *kubernetes.Clientset, request *certificates.CertificateSigningRequest) (string, error) {
-	isKubeletBootstrapGroup := false
+func (g *group) Configure(config string) error {
+	if config != "" {
+		g.requiredGroup = config
+	}
+	return nil
+}
+
+func (g *group) Inspect(client *kubernetes.Clientset, request *certificates.CertificateSigningRequest) (string, error) {
+	isRequiredGroup := false
 	for _, group := range request.Spec.Groups {
-		if group == kubeletBootstrapGroup {
-			isKubeletBootstrapGroup = true
+		if group == g.requiredGroup {
+			isRequiredGroup = true
 			break
 		}
 	}
-	if !isKubeletBootstrapGroup {
-		return fmt.Sprintf("Requesting user %s is not in the %s group", request.Spec.Username, kubeletBootstrapGroup), nil
+	if !isRequiredGroup {
+		return fmt.Sprintf("Requesting user %s is not in the %s group", request.Spec.Username, g.requiredGroup), nil
 	}
 
 	return "", nil

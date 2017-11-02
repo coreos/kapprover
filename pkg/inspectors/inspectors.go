@@ -20,11 +20,13 @@ var (
 // It returns an empty string to take no action, a human readable message with details
 // to take adverse action, or an error to temporarily fail.
 type Inspector interface {
+	Configure(string) error
 	Inspect(*kubernetes.Clientset, *certificates.CertificateSigningRequest) (message string, err error)
 }
 
 type NamedInspector struct {
 	Name      string
+	Config    string
 	Inspector Inspector
 }
 
@@ -38,12 +40,18 @@ func (inspectors *Inspectors) String() string {
 			b.WriteString(",")
 		}
 		b.WriteString(namedInspector.Name)
+		if namedInspector.Config != "" {
+			b.WriteString("=")
+			b.WriteString(namedInspector.Config)
+		}
 	}
 	return b.String()
 }
 
 func (inspectors *Inspectors) Set(value string) error {
-	for _, name := range strings.Split(value, ",") {
+	for _, nameAndConfig := range strings.Split(value, ",") {
+		split := strings.SplitN(nameAndConfig, "=", 2)
+		name := split[0]
 		inspector, exists := Get(name)
 		if !exists {
 			return errors.New(fmt.Sprintf(
@@ -52,7 +60,17 @@ func (inspectors *Inspectors) Set(value string) error {
 				strings.Join(List(), ","),
 			))
 		}
-		*inspectors = append(*inspectors, NamedInspector{Name: name, Inspector: inspector})
+		var config string
+		if len(split) > 1 {
+			config = split[1]
+		}
+		if config != "" {
+			err := inspector.Configure(split[1])
+			if err != nil {
+				return err
+			}
+		}
+		*inspectors = append(*inspectors, NamedInspector{Name: name, Config: config, Inspector: inspector})
 	}
 	return nil
 }
