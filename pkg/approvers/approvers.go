@@ -4,8 +4,8 @@ import (
 	"strings"
 	"sync"
 
-	"k8s.io/client-go/kubernetes/typed/certificates/v1alpha1"
-	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
+	"k8s.io/client-go/kubernetes/typed/certificates/v1beta1"
+	certificates "k8s.io/client-go/pkg/apis/certificates/v1beta1"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 
 // Approver reprensents anything capable to validating and approving a CSR.
 type Approver interface {
-	Approve(v1alpha1.CertificateSigningRequestInterface, *certificates.CertificateSigningRequest) error
+	Approve(v1beta1.CertificateSigningRequestInterface, *certificates.CertificateSigningRequest) error
 }
 
 // Register makes an Approver available by the provided name.

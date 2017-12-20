@@ -5,8 +5,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/kapprover/pkg/approvers"
-	"k8s.io/client-go/kubernetes/typed/certificates/v1alpha1"
-	certificates "k8s.io/client-go/pkg/apis/certificates/v1alpha1"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/typed/certificates/v1beta1"
+	certificates "k8s.io/client-go/pkg/apis/certificates/v1beta1"
 )
 
 const (
@@ -25,7 +26,7 @@ func init() {
 type Always struct{}
 
 // Approve approves CSRs in a loop.
-func (*Always) Approve(client v1alpha1.CertificateSigningRequestInterface, request *certificates.CertificateSigningRequest) error {
+func (*Always) Approve(client v1beta1.CertificateSigningRequestInterface, request *certificates.CertificateSigningRequest) error {
 	condition := certificates.CertificateSigningRequestCondition{
 		Type:    certificates.CertificateApproved,
 		Reason:  "AutoApproved",
@@ -68,7 +69,7 @@ func (*Always) Approve(client v1alpha1.CertificateSigningRequestInterface, reque
 			if strings.Contains(err.Error(), "the object has been modified") {
 				// The CSR might have been updated by a third-party, retry until we
 				// succeed.
-				request, err = client.Get(request.ObjectMeta.Name)
+				request, err = client.Get(request.ObjectMeta.Name, meta.GetOptions{})
 				if err != nil {
 					return err
 				}
