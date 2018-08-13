@@ -3,7 +3,7 @@
 _kapprover_ is a tool meant to be deployed in Kubernetes clusters that uses the
 [TLS client certificate bootstrapping] flow for kubelets. It will then monitor
 and automatically approves Certificate Signing Requests submitted by kubelets,
-based on the the policy selected at startup.
+based on the policy selected at startup.
 
 As of today, a single approval policy, called `always` exists, and approves any
 pending CSRs without making any kind of validation besides checking that the
